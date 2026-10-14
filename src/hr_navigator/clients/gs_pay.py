@@ -398,3 +398,114 @@ def compute_pay(
     if duty_station:
         result["duty_station"] = duty_station
     return result
+
+
+def compare_pay(
+    from_grade: int,
+    from_step: int,
+    to_grade: int,
+    to_step: int,
+    from_locality_code: str = "RUS",
+    to_locality_code: str | None = None,
+    *,
+    from_city: str | None = None,
+    from_state: str | None = None,
+    to_city: str | None = None,
+    to_state: str | None = None,
+) -> dict[str, Any]:
+    """Compare pay between two GS positions (grade, step, location).
+
+    Useful for modelling promotions, within-grade step increases, and
+    location changes.  Either or both positions can be specified by city
+    or by locality code.
+
+    ``to_locality_code`` defaults to ``from_locality_code`` so a pure
+    grade/step comparison (same location) requires only the four grade/step
+    arguments.
+
+    Parameters
+    ----------
+    from_grade, from_step:      Current position grade and step.
+    to_grade, to_step:          Target position grade and step.
+    from_locality_code:         Current locality code (default 'RUS').
+    to_locality_code:           Target locality code; defaults to same as current.
+    from_city / from_state:     Current duty-station city/state (overrides from_locality_code).
+    to_city / to_state:         Target duty-station city/state (overrides to_locality_code).
+
+    Returns
+    -------
+    dict with keys:
+        ``from``, ``to``     — full compute_pay results for each position.
+        ``difference``       — ``salary_delta`` (int), ``pct_change`` (float,
+                               rounded to 2 dp), ``is_promotion`` (bool),
+                               ``grade_change``, ``step_change``,
+                               ``locality_change`` (bool), ``summary`` (str).
+    """
+    from_pay = compute_pay(
+        from_grade, from_step, from_locality_code,
+        city=from_city, state=from_state,
+    )
+
+    # "to" locality defaults to whatever "from" actually resolved to
+    # (important when from_city overrides from_locality_code).
+    resolved_to_code = (
+        to_locality_code
+        if to_locality_code is not None
+        else from_pay["locality"]["code"]
+    )
+    to_pay = compute_pay(
+        to_grade, to_step, resolved_to_code,
+        city=to_city, state=to_state,
+    )
+
+    from_salary = from_pay["final_salary"]
+    to_salary   = to_pay["final_salary"]
+    delta       = to_salary - from_salary
+    pct_change  = round((delta / from_salary) * 100, 2) if from_salary else 0.0
+
+    from_loc = from_pay["locality"]["code"]
+    to_loc   = to_pay["locality"]["code"]
+    locality_change = from_loc != to_loc
+
+    grade_change = to_grade - from_grade
+    step_change  = to_step  - from_step
+
+    # Build a plain-English summary
+    parts: list[str] = []
+    if grade_change > 0:
+        parts.append(f"promotion from GS-{from_grade} to GS-{to_grade}")
+    elif grade_change < 0:
+        parts.append(f"downgrade from GS-{from_grade} to GS-{to_grade}")
+    else:
+        parts.append(f"same grade GS-{from_grade}")
+
+    if step_change > 0:
+        parts.append(f"step {from_step} → {to_step}")
+    elif step_change < 0:
+        parts.append(f"step decrease {from_step} → {to_step}")
+
+    if locality_change:
+        from_name = from_pay["locality"]["name"]
+        to_name   = to_pay["locality"]["name"]
+        parts.append(f"location change ({from_name} → {to_name})")
+
+    direction = "increase" if delta >= 0 else "decrease"
+    summary = (
+        f"{'; '.join(parts).capitalize()}: "
+        f"${from_salary:,} → ${to_salary:,} "
+        f"({direction} of ${abs(delta):,} / {abs(pct_change):.2f}%)"
+    )
+
+    return {
+        "from":       from_pay,
+        "to":         to_pay,
+        "difference": {
+            "salary_delta":      delta,
+            "pct_change":        pct_change,
+            "is_promotion":      grade_change > 0,
+            "grade_change":      grade_change,
+            "step_change":       step_change,
+            "locality_change":   locality_change,
+            "summary":           summary,
+        },
+    }

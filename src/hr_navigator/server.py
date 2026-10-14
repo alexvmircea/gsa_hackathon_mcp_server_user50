@@ -14,6 +14,7 @@ Run (stdio transport for desktop clients):
 import fastmcp
 
 from hr_navigator.tools.pay_tools import (
+    compare_gs_pay,
     get_gs_pay_info,
     list_gs_localities,
     search_duty_stations,
@@ -30,6 +31,8 @@ mcp = fastmcp.FastMCP(
         "leave policies, pay administration, and other HR topics governed by Title 5. "
         "Use get_gs_pay_info to compute locality-adjusted GS salaries by "
         "locality code or by actual city name. "
+        "Use compare_gs_pay to model promotions, step increases, or location moves "
+        "and show the salary difference between two positions. "
         "Use list_gs_localities to look up locality pay area codes and rates. "
         "Use search_duty_stations to find valid OPM duty-station city names."
     ),
@@ -38,6 +41,7 @@ mcp = fastmcp.FastMCP(
 # Register tools
 mcp.tool()(look_up_hr_policy)
 mcp.tool()(get_gs_pay_info)
+mcp.tool()(compare_gs_pay)
 mcp.tool()(list_gs_localities)
 mcp.tool()(search_duty_stations)
 

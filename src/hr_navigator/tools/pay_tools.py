@@ -1,5 +1,5 @@
 """
-MCP tools: get_gs_pay_info, list_gs_localities, search_duty_stations
+MCP tools: get_gs_pay_info, list_gs_localities, search_duty_stations, compare_gs_pay
 
 Gives an AI agent access to 2026 OPM General Schedule pay data — base rates,
 locality-adjusted salaries, the full list of locality pay areas, and an
@@ -21,6 +21,7 @@ from pydantic import Field
 
 from hr_navigator.clients.gs_pay import (
     PayDataError,
+    compare_pay,
     compute_pay,
     list_localities,
     search_duty_stations as _search_duty_stations,
@@ -199,3 +200,146 @@ async def search_duty_stations(
     except PayDataError as exc:
         raise RuntimeError(str(exc)) from exc
     return sorted(results, key=lambda x: (x["city"], x["state"]))
+
+
+async def compare_gs_pay(
+    from_grade: Annotated[
+        int,
+        Field(description="Current GS grade (1–15).", ge=1, le=15),
+    ],
+    from_step: Annotated[
+        int,
+        Field(description="Current within-grade step (1–10).", ge=1, le=10),
+    ],
+    to_grade: Annotated[
+        int,
+        Field(description="Target GS grade (1–15).", ge=1, le=15),
+    ],
+    to_step: Annotated[
+        int,
+        Field(description="Target within-grade step (1–10).", ge=1, le=10),
+    ],
+    from_locality_code: Annotated[
+        str,
+        Field(
+            default="RUS",
+            description=(
+                "Locality code for the current position. "
+                "Ignored when 'from_city' is provided. "
+                "Defaults to 'RUS' (Rest of U.S.)."
+            ),
+            min_length=1,
+            max_length=5,
+        ),
+    ] = "RUS",
+    to_locality_code: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description=(
+                "Locality code for the target position. "
+                "Ignored when 'to_city' is provided. "
+                "Defaults to the same locality as the current position."
+            ),
+            min_length=1,
+            max_length=5,
+        ),
+    ] = None,
+    from_city: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description=(
+                "Current duty-station city (e.g. 'Huntsville'). "
+                "Takes precedence over 'from_locality_code'."
+            ),
+            min_length=1,
+            max_length=100,
+        ),
+    ] = None,
+    from_state: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description="State of the current duty station (disambiguates city).",
+            min_length=1,
+            max_length=50,
+        ),
+    ] = None,
+    to_city: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description=(
+                "Target duty-station city (e.g. 'San Francisco'). "
+                "Takes precedence over 'to_locality_code'."
+            ),
+            min_length=1,
+            max_length=100,
+        ),
+    ] = None,
+    to_state: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description="State of the target duty station (disambiguates city).",
+            min_length=1,
+            max_length=50,
+        ),
+    ] = None,
+) -> dict[str, Any]:
+    """Compare GS pay between two positions — grade, step, and/or location.
+
+    Handles three common scenarios in one call:
+
+    1. **Promotion** — model a grade increase (e.g. GS-11 step 5 → GS-12 step 1).
+    2. **Step progression** — see the gain from a within-grade step increase
+       (e.g. GS-13 step 4 → GS-13 step 5).
+    3. **Location move** — compare pay for the same grade/step across two
+       duty-station cities or locality areas.
+    4. **Combined** — any combination of the above (e.g. promotion + relocation).
+
+    Location can be given as a city name or a locality code for each side.
+
+    When to use
+    -----------
+    - "How much more would I earn as a GS-12 step 1 compared to my current GS-11 step 10?"
+    - "What's the pay difference between GS-13 step 4 in Lacey, WA and the same job in DC?"
+    - "Show me the salary gain from step 5 to step 6 at GS-13 in San Francisco."
+    - "If I move from Huntsville to Washington DC as a GS-14 step 3, how does my pay change?"
+
+    Parameters
+    ----------
+    from_grade, from_step:       Current GS position grade and step.
+    to_grade, to_step:           Target GS position grade and step.
+    from_city / from_state:      Current duty-station city (and optional state).
+    to_city / to_state:          Target duty-station city (and optional state).
+    from_locality_code:          Current locality code when city is not provided.
+    to_locality_code:            Target locality code when city is not provided;
+                                 defaults to same as current.
+
+    Returns
+    -------
+    dict
+        ``from``         — full pay details for the current position.
+        ``to``           — full pay details for the target position.
+        ``difference``   — ``salary_delta`` ($), ``pct_change`` (%),
+                           ``is_promotion`` (bool), ``grade_change``,
+                           ``step_change``, ``locality_change`` (bool),
+                           ``summary`` (plain-English one-liner).
+
+    Raises
+    ------
+    RuntimeError
+        If any grade/step is out of range, a locality code is unknown,
+        or a city is not found in the OPM duty-station table.
+    """
+    try:
+        return compare_pay(
+            from_grade, from_step, to_grade, to_step,
+            from_locality_code, to_locality_code,
+            from_city=from_city, from_state=from_state,
+            to_city=to_city, to_state=to_state,
+        )
+    except PayDataError as exc:
+        raise RuntimeError(str(exc)) from exc

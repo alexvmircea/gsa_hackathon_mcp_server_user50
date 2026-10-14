@@ -15,6 +15,7 @@ from hr_navigator.clients.gs_pay import (
     PayDataError,
     _load_raw,
     _load_stations,
+    compare_pay,
     compute_pay,
     get_base_rate,
     get_metadata,
@@ -23,6 +24,7 @@ from hr_navigator.clients.gs_pay import (
     search_duty_stations,
 )
 from hr_navigator.tools.pay_tools import (
+    compare_gs_pay,
     get_gs_pay_info,
     list_gs_localities,
     search_duty_stations as tool_search_duty_stations,
@@ -401,3 +403,164 @@ async def test_tool_search_duty_stations_sorted():
     results = await tool_search_duty_stations(city="fort")
     cities = [(r["city"], r["state"]) for r in results]
     assert cities == sorted(cities)
+
+
+# ---------------------------------------------------------------------------
+# compare_pay — client
+# ---------------------------------------------------------------------------
+
+
+def test_compare_pay_promotion():
+    """Grade increase: from → to salary must increase, is_promotion = True."""
+    result = compare_pay(11, 5, 12, 1, "DCB")
+    diff = result["difference"]
+    assert diff["is_promotion"] is True
+    assert diff["grade_change"] == 1
+    assert diff["step_change"] == -4
+    assert diff["salary_delta"] > 0
+    assert diff["pct_change"] > 0
+    assert "promotion" in diff["summary"].lower()
+
+
+def test_compare_pay_step_increase():
+    """Pure step progression: same grade, same locality."""
+    result = compare_pay(13, 4, 13, 5, "SEA")
+    diff = result["difference"]
+    assert diff["is_promotion"] is False
+    assert diff["grade_change"] == 0
+    assert diff["step_change"] == 1
+    assert diff["locality_change"] is False
+    assert diff["salary_delta"] > 0
+    assert result["to"]["final_salary"] > result["from"]["final_salary"]
+
+
+def test_compare_pay_location_move_same_grade():
+    """Same grade/step, different locality: locality_change = True."""
+    result = compare_pay(13, 4, 13, 4, "RUS", "DCB")
+    diff = result["difference"]
+    assert diff["is_promotion"] is False
+    assert diff["locality_change"] is True
+    assert diff["grade_change"] == 0
+    assert diff["step_change"] == 0
+    assert diff["salary_delta"] > 0  # DCB pays more than RUS
+    assert "location change" in diff["summary"].lower()
+
+
+def test_compare_pay_by_city():
+    """City-resolved comparison: Lacey WA (SEA) vs Washington DC (DCB)."""
+    result = compare_pay(
+        13, 4, 13, 4,
+        from_city="Lacey", from_state="Washington",
+        to_city="Washington", to_state="District Of Columbia",
+    )
+    diff = result["difference"]
+    assert diff["locality_change"] is True
+    assert result["from"]["locality"]["code"] == "SEA"
+    assert result["to"]["locality"]["code"] == "DCB"
+    # DCB rate (33.94%) > SEA rate (31.57%) → to salary > from salary
+    assert diff["salary_delta"] > 0
+
+
+def test_compare_pay_default_to_locality_matches_from():
+    """When to_locality_code is omitted, both sides use the same locality."""
+    result = compare_pay(9, 1, 9, 2, "SF")
+    assert result["from"]["locality"]["code"] == "SF"
+    assert result["to"]["locality"]["code"] == "SF"
+    assert result["difference"]["locality_change"] is False
+
+
+def test_compare_pay_result_structure():
+    result = compare_pay(7, 3, 9, 1, "RUS")
+    assert set(result.keys()) == {"from", "to", "difference"}
+    diff = result["difference"]
+    assert set(diff.keys()) == {
+        "salary_delta", "pct_change", "is_promotion",
+        "grade_change", "step_change", "locality_change", "summary",
+    }
+    assert isinstance(diff["summary"], str) and len(diff["summary"]) > 10
+
+
+def test_compare_pay_cap_both_sides():
+    """Both capped positions still return correct delta (may be zero)."""
+    result = compare_pay(15, 9, 15, 10, "SF")
+    assert result["from"]["is_capped"] is True
+    assert result["to"]["is_capped"] is True
+    # Both hit $197,200 → delta must be 0
+    assert result["difference"]["salary_delta"] == 0
+
+
+def test_compare_pay_invalid_grade_raises():
+    with pytest.raises(PayDataError):
+        compare_pay(0, 1, 9, 1)
+
+
+# ---------------------------------------------------------------------------
+# compare_gs_pay — MCP tool
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_compare_gs_pay_promotion():
+    result = await compare_gs_pay(
+        from_grade=11, from_step=5,
+        to_grade=12, to_step=1,
+        from_locality_code="DCB",
+    )
+    diff = result["difference"]
+    assert diff["is_promotion"] is True
+    assert diff["salary_delta"] > 0
+    assert "promotion" in diff["summary"].lower()
+
+
+@pytest.mark.asyncio
+async def test_compare_gs_pay_step_increase():
+    result = await compare_gs_pay(
+        from_grade=13, from_step=4,
+        to_grade=13, to_step=5,
+        from_city="Lacey", from_state="Washington",
+    )
+    diff = result["difference"]
+    assert diff["grade_change"] == 0
+    assert diff["step_change"] == 1
+    assert diff["salary_delta"] > 0
+    assert result["from"]["locality"]["code"] == "SEA"
+    assert result["to"]["locality"]["code"] == "SEA"
+
+
+@pytest.mark.asyncio
+async def test_compare_gs_pay_location_move_by_city():
+    result = await compare_gs_pay(
+        from_grade=14, from_step=3,
+        to_grade=14, to_step=3,
+        from_city="Huntsville", from_state="Alabama",
+        to_city="Washington", to_state="District Of Columbia",
+    )
+    diff = result["difference"]
+    assert diff["locality_change"] is True
+    assert result["from"]["locality"]["code"] == "HNT"
+    assert result["to"]["locality"]["code"] == "DCB"
+    assert diff["salary_delta"] > 0
+
+
+@pytest.mark.asyncio
+async def test_compare_gs_pay_combined_promotion_and_move():
+    result = await compare_gs_pay(
+        from_grade=12, from_step=7,
+        to_grade=13, to_step=1,
+        from_city="Huntsville", from_state="Alabama",
+        to_city="San Francisco", to_state="California",
+    )
+    diff = result["difference"]
+    assert diff["is_promotion"] is True
+    assert diff["locality_change"] is True
+    assert diff["salary_delta"] > 0
+
+
+@pytest.mark.asyncio
+async def test_compare_gs_pay_bad_city_raises():
+    with pytest.raises(RuntimeError, match="No OPM duty station found"):
+        await compare_gs_pay(
+            from_grade=9, from_step=1,
+            to_grade=9, to_step=2,
+            from_city="Zzzznonexistentcity",
+        )

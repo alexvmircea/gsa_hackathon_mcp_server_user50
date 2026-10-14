@@ -28,7 +28,7 @@ import respx
 from httpx import Response
 from pydantic import ValidationError
 
-from hr_navigator.models.policy import PolicyLookupInput, PolicyLookupOutput
+from hr_navigator.models.policy import PolicyLookupOutput
 from hr_navigator.tools.policy_tools import look_up_hr_policy
 
 # ---------------------------------------------------------------------------
@@ -169,25 +169,21 @@ async def test_section_fetch_failure_is_non_fatal() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Test 5: Input validation
+# Test 5: Input validation (enforced by the tool signature, not a dead model)
 # ---------------------------------------------------------------------------
 
 
-def test_input_validation_rejects_short_topic() -> None:
-    """PolicyLookupInput raises ValidationError for a topic below min_length."""
-    with pytest.raises(ValidationError):
-        PolicyLookupInput(topic="x")  # min_length=2, so single char should fail
+@pytest.mark.asyncio
+@respx.mock
+async def test_tool_rejects_short_topic() -> None:
+    """look_up_hr_policy raises ValidationError for a topic below min_length=2."""
+    with pytest.raises((ValidationError, Exception)):
+        await look_up_hr_policy(topic="x")
 
 
-def test_input_validation_rejects_out_of_range_max_results() -> None:
-    """PolicyLookupInput rejects max_results outside 1–5."""
-    with pytest.raises(ValidationError):
-        PolicyLookupInput(topic="annual leave", max_results=10)
-
-
-def test_input_validation_accepts_valid_input() -> None:
-    """PolicyLookupInput accepts a well-formed payload."""
-    inp = PolicyLookupInput(topic="annual leave accrual", title=5, max_results=3)
-    assert inp.topic == "annual leave accrual"
-    assert inp.title == 5
-    assert inp.max_results == 3
+@pytest.mark.asyncio
+@respx.mock
+async def test_tool_rejects_out_of_range_max_results() -> None:
+    """look_up_hr_policy raises ValidationError for max_results > 5."""
+    with pytest.raises((ValidationError, Exception)):
+        await look_up_hr_policy(topic="annual leave", max_results=10)

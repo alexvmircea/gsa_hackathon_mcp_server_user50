@@ -70,14 +70,6 @@ class ECFRClient:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _http(self) -> httpx.AsyncClient:
-        if self._client is None:
-            raise RuntimeError(
-                "ECFRClient must be used as an async context manager "
-                "(async with ECFRClient() as client: ...)"
-            )
-        return self._http_client
-
     @property
     def _http_client(self) -> httpx.AsyncClient:
         assert self._client is not None
@@ -105,18 +97,16 @@ class ECFRClient:
     async def _get_xml(self, path: str, **params: Any) -> str:
         """Issue a GET request and return raw XML text.
 
+        Uses the shared client from ``__aenter__``, overriding the default
+        ``Accept: application/json`` header for this request only.
+
         Raises :class:`ECFRError` for non-2xx responses.
         """
         try:
-            client = httpx.AsyncClient(
-                base_url=self._base_url,
-                timeout=_TIMEOUT,
-                follow_redirects=True,
-                headers={"Accept": "application/xml"},
+            response = await self._http_client.get(
+                path, params=params, headers={"Accept": "application/xml"}
             )
-            async with client as c:
-                response = await c.get(path, params=params)
-                response.raise_for_status()
+            response.raise_for_status()
         except httpx.HTTPStatusError as exc:
             raise ECFRError(
                 f"eCFR API error {exc.response.status_code} for {exc.request.url}: "

@@ -20,7 +20,9 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
-from typing import Any
+from typing import Annotated, Any
+
+from pydantic import Field
 
 from hr_navigator.clients.ecfr import ECFRClient, ECFRError, extract_text_from_xml
 from hr_navigator.config import DEFAULT_CFR_TITLE, DEFAULT_MAX_RESULTS, ECFR_BASE_URL
@@ -44,17 +46,29 @@ def _parse_hierarchy(hit: dict[str, Any]) -> tuple[int, int, int] | None:
 
         {"title": "5", "part": "630", "section": "202"}
 
-    Returns ``None`` if any required field is missing or non-numeric.
+    Returns ``None`` if any required field is missing, non-numeric, or contains a
+    letter suffix (e.g. ``"501a"`` in Title 5 Part 551).
+
+    **Known limitation:** sections with alphanumeric identifiers (e.g. 5 CFR
+    § 551.501a) are silently excluded from results.  The ``section`` field in
+    :class:`~hr_navigator.models.policy.PolicyResult` is typed as ``int``, so
+    these sections cannot be represented without a broader model change.  Rather
+    than emit a wrong citation (e.g. ``551.501`` instead of ``551.501a``), we
+    drop the hit entirely.  See the Option B/C discussion in policy_tools.py if
+    full alphanumeric support is ever needed.
     """
     h = hit.get("hierarchy", {})
     try:
         title = int(h.get("title", 0))
         part = int(h.get("part", 0))
-        # section may be "630.202" — take the digits after the dot
+        # section may be "630.202" — take the part after the last dot
         raw_section = str(h.get("section", "0"))
-        # Handle "630.202" → 202, or plain "202"
         section_str = raw_section.split(".")[-1]
-        section = int(re.sub(r"\D", "", section_str) or "0")
+        # Reject sections with letter suffixes (e.g. "501a") rather than
+        # silently truncating to an incorrect integer.
+        if not section_str.isdigit():
+            return None
+        section = int(section_str)
         if title and part and section:
             return title, part, section
     except (ValueError, TypeError):
@@ -80,9 +94,43 @@ def _heading_from_hit(hit: dict[str, Any]) -> str:
 
 
 async def look_up_hr_policy(
-    topic: str,
-    title: int = DEFAULT_CFR_TITLE,
-    max_results: int = DEFAULT_MAX_RESULTS,
+    topic: Annotated[
+        str,
+        Field(
+            description=(
+                "Plain-language description of the HR policy topic to look up. "
+                "Examples: 'annual leave accrual', 'telework eligibility', "
+                "'probationary period', 'reduction in force'."
+            ),
+            min_length=2,
+            max_length=300,
+        ),
+    ],
+    title: Annotated[
+        int,
+        Field(
+            default=DEFAULT_CFR_TITLE,
+            description=(
+                "CFR title number to search. Default is 5 (Administrative Personnel), "
+                "which covers the vast majority of federal HR policy. Change only if "
+                "you have a specific reason to search a different title."
+            ),
+            ge=1,
+            le=50,
+        ),
+    ] = DEFAULT_CFR_TITLE,
+    max_results: Annotated[
+        int,
+        Field(
+            default=DEFAULT_MAX_RESULTS,
+            description=(
+                "Maximum number of regulatory sections to return (1–5). "
+                "Higher values increase response time."
+            ),
+            ge=1,
+            le=5,
+        ),
+    ] = DEFAULT_MAX_RESULTS,
 ) -> PolicyLookupOutput:
     """Find the governing federal regulation(s) for an HR policy topic.
 

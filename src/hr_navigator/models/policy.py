@@ -1,9 +1,11 @@
 """
 Pydantic models for the look_up_hr_policy tool.
 
-These models are the single source of truth for what the tool accepts
-and returns.  FastMCP generates JSON Schema from them automatically,
-giving the calling agent a precise, self-describing contract.
+Input validation constraints (min_length, max_length, ge, le) live as
+``Annotated`` types directly on the ``look_up_hr_policy`` function signature
+in ``policy_tools.py``.  FastMCP reads those annotations to generate the
+JSON Schema and enforce validation at call time.  There is no separate input
+model — that would be dead code because FastMCP never instantiates it.
 """
 
 from __future__ import annotations
@@ -12,55 +14,6 @@ from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator
-
-
-# ---------------------------------------------------------------------------
-# Input model
-# ---------------------------------------------------------------------------
-
-
-class PolicyLookupInput(BaseModel):
-    """Input parameters for look_up_hr_policy."""
-
-    topic: Annotated[
-        str,
-        Field(
-            description=(
-                "Plain-language description of the HR policy topic to look up. "
-                "Examples: 'annual leave accrual', 'telework eligibility', "
-                "'probationary period', 'reduction in force'."
-            ),
-            min_length=2,
-            max_length=300,
-        ),
-    ]
-
-    title: Annotated[
-        int,
-        Field(
-            default=5,
-            description=(
-                "CFR title number to search. Default is 5 (Administrative Personnel), "
-                "which covers the vast majority of federal HR policy. Change only if "
-                "you have a specific reason to search a different title."
-            ),
-            ge=1,
-            le=50,
-        ),
-    ] = 5
-
-    max_results: Annotated[
-        int,
-        Field(
-            default=3,
-            description=(
-                "Maximum number of regulatory sections to return (1–5). "
-                "Higher values increase response time."
-            ),
-            ge=1,
-            le=5,
-        ),
-    ] = 3
 
 
 # ---------------------------------------------------------------------------

@@ -365,7 +365,12 @@ def compute_pay(
     if city:
         ds = resolve_locality_by_city(city, state)
         locality_code = ds["locality_code"]
-        duty_station = {"city": ds["city"], "state": ds["state"], "lpa": ds["lpa"]}
+        duty_station = {
+            "city":              ds["city"],
+            "state":             ds["state"],
+            "lpa":               ds["lpa"],
+            "csv_locality_code": ds["csv_locality_code"],
+        }
 
     loc = _resolve_locality(locality_code)
     meta = _load_raw()["metadata"]

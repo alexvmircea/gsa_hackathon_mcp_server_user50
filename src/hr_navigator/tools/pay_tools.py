@@ -116,8 +116,8 @@ async def get_gs_pay_info(
     dict
         ``grade``, ``step``, ``base_rate``, ``locality`` (code/name/rate_pct),
         ``locality_adjusted``, ``pay_cap``, ``is_capped``, ``final_salary``,
-        ``schedule_year``, and ``duty_station`` (city/state/lpa) when resolved
-        by city.
+        ``schedule_year``.  When resolved via city, also includes
+        ``duty_station`` (city, state, lpa, csv_locality_code).
 
     Raises
     ------
@@ -189,8 +189,10 @@ async def search_duty_stations(
     Returns
     -------
     list of dict
-        Each entry has ``city``, ``state``, ``lpa``, ``locality_code``,
-        sorted by city name.  Up to 20 results (de-duplicated by city+state).
+        Each entry has ``city``, ``state``, ``lpa``, ``locality_code``
+        (gs_pay code, e.g. ``'SEA'``), and ``csv_locality_code`` (OPM CSV
+        code, e.g. ``'ST'``), sorted by city name.
+        Up to 20 results, de-duplicated by city+state.
     """
     try:
         results = _search_duty_stations(city, state)

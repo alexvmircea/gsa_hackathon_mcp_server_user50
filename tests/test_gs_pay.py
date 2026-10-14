@@ -351,6 +351,7 @@ def test_compute_pay_by_city():
     assert result["locality"]["code"] == "HNT"
     assert "duty_station" in result
     assert result["duty_station"]["city"] == "Huntsville"
+    assert result["duty_station"]["csv_locality_code"] == "HU"
 
 
 def test_compute_pay_city_overrides_locality_code():
@@ -377,6 +378,8 @@ async def test_get_gs_pay_info_by_city():
     result = await get_gs_pay_info(grade=11, step=3, city="Huntsville", state="Alabama")
     assert result["locality"]["code"] == "HNT"
     assert result["duty_station"]["city"] == "Huntsville"
+    assert result["duty_station"]["csv_locality_code"] == "HU"
+    assert set(result["duty_station"].keys()) == {"city", "state", "lpa", "csv_locality_code"}
     assert result["final_salary"] > 0
 
 

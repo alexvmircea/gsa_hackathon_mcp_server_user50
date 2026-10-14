@@ -1,0 +1,434 @@
+{
+  "metadata": {
+    "schedule_year": 2026,
+    "source": "U.S. Office of Personnel Management, Salary Table 2026-GS",
+    "source_url": "https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/salary-tables/pdf/2026/GS.pdf",
+    "effective_date": "2026-01-11",
+    "general_increase_pct": 1.0,
+    "notes": [
+      "Annual base rates by grade (1-15) and step (1-10), before any locality adjustment or special rate.",
+      "All 58 locality rates sourced from OPM 2026 salary-table XML; rates frozen at 2025 levels by executive order.",
+      "Pay cap: no locality-adjusted salary may exceed Executive Schedule Level IV = $197,200.",
+      "All 15 base rows transcribed from the OPM 2026-GS PDF and verified: grades 3-15 pass the published within-grade-amount checksum; grades 1-2 (VARIES) confirmed complete and monotonic."
+    ],
+    "pay_cap_executive_level_iv": 197200
+  },
+  "base_table": {
+    "_comment": "Each grade maps to an array of 10 annual step rates [step1 ... step10].",
+    "1": [
+      22584,
+      23341,
+      24092,
+      24840,
+      25589,
+      26028,
+      26771,
+      27519,
+      27550,
+      28248
+    ],
+    "2": [
+      25393,
+      25997,
+      26839,
+      27550,
+      27858,
+      28677,
+      29496,
+      30315,
+      31134,
+      31953
+    ],
+    "3": [
+      27708,
+      28632,
+      29556,
+      30480,
+      31404,
+      32328,
+      33252,
+      34176,
+      35100,
+      36024
+    ],
+    "4": [
+      31103,
+      32140,
+      33177,
+      34214,
+      35251,
+      36288,
+      37325,
+      38362,
+      39399,
+      40436
+    ],
+    "5": [
+      34799,
+      35959,
+      37119,
+      38279,
+      39439,
+      40599,
+      41759,
+      42919,
+      44079,
+      45239
+    ],
+    "6": [
+      38791,
+      40084,
+      41377,
+      42670,
+      43963,
+      45256,
+      46549,
+      47842,
+      49135,
+      50428
+    ],
+    "7": [
+      43106,
+      44543,
+      45980,
+      47417,
+      48854,
+      50291,
+      51728,
+      53165,
+      54602,
+      56039
+    ],
+    "8": [
+      47738,
+      49329,
+      50920,
+      52511,
+      54102,
+      55693,
+      57284,
+      58875,
+      60466,
+      62057
+    ],
+    "9": [
+      52727,
+      54485,
+      56243,
+      58001,
+      59759,
+      61517,
+      63275,
+      65033,
+      66791,
+      68549
+    ],
+    "10": [
+      58064,
+      59999,
+      61934,
+      63869,
+      65804,
+      67739,
+      69674,
+      71609,
+      73544,
+      75479
+    ],
+    "11": [
+      63795,
+      65922,
+      68049,
+      70176,
+      72303,
+      74430,
+      76557,
+      78684,
+      80811,
+      82938
+    ],
+    "12": [
+      76463,
+      79012,
+      81561,
+      84110,
+      86659,
+      89208,
+      91757,
+      94306,
+      96855,
+      99404
+    ],
+    "13": [
+      90925,
+      93956,
+      96987,
+      100018,
+      103049,
+      106080,
+      109111,
+      112142,
+      115173,
+      118204
+    ],
+    "14": [
+      107446,
+      111028,
+      114610,
+      118192,
+      121774,
+      125356,
+      128938,
+      132520,
+      136102,
+      139684
+    ],
+    "15": [
+      126384,
+      130597,
+      134810,
+      139023,
+      143236,
+      147449,
+      151662,
+      155875,
+      160088,
+      164301
+    ]
+  },
+  "localities": {
+    "_comment": "locality_code -> {name, rate_pct}. All 58 rates confirmed from OPM 2026 salary-table XML (https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/salary-tables/xml/2026/<CODE>.xml). Rates were frozen at 2025 levels by executive order; the 2026 XML confirms identical values. RUS 17.06% is the national floor, SF 46.34% the ceiling.",
+    "AL": {
+      "name": "Albany-Schenectady, NY-MA",
+      "rate_pct": 20.77
+    },
+    "AQ": {
+      "name": "Albuquerque-Santa Fe-Las Vegas, NM",
+      "rate_pct": 18.33
+    },
+    "ATL": {
+      "name": "Atlanta-Athens-Clarke County-Sandy Springs, GA-AL",
+      "rate_pct": 23.79
+    },
+    "AU": {
+      "name": "Austin-Round Rock-Georgetown, TX",
+      "rate_pct": 20.35
+    },
+    "BH": {
+      "name": "Birmingham-Hoover-Talladega, AL",
+      "rate_pct": 18.24
+    },
+    "BOS": {
+      "name": "Boston-Worcester-Providence, MA-RI-NH-CT-ME-VT",
+      "rate_pct": 32.58
+    },
+    "BU": {
+      "name": "Buffalo-Cheektowaga-Olean, NY",
+      "rate_pct": 22.41
+    },
+    "BN": {
+      "name": "Burlington-South Burlington-Barre, VT",
+      "rate_pct": 19.45
+    },
+    "CT": {
+      "name": "Charlotte-Concord, NC-SC",
+      "rate_pct": 19.67
+    },
+    "CHI": {
+      "name": "Chicago-Naperville, IL-IN-WI",
+      "rate_pct": 30.86
+    },
+    "CIN": {
+      "name": "Cincinnati-Wilmington-Maysville, OH-KY-IN",
+      "rate_pct": 21.93
+    },
+    "CLE": {
+      "name": "Cleveland-Akron-Canton, OH-PA",
+      "rate_pct": 22.23
+    },
+    "CS": {
+      "name": "Colorado Springs, CO",
+      "rate_pct": 20.15
+    },
+    "COL": {
+      "name": "Columbus-Marion-Zanesville, OH",
+      "rate_pct": 22.15
+    },
+    "CC": {
+      "name": "Corpus Christi-Kingsville-Alice, TX",
+      "rate_pct": 17.63
+    },
+    "DFW": {
+      "name": "Dallas-Fort Worth, TX-OK",
+      "rate_pct": 27.26
+    },
+    "DV": {
+      "name": "Davenport-Moline, IA-IL",
+      "rate_pct": 18.93
+    },
+    "DAY": {
+      "name": "Dayton-Springfield-Kettering, OH",
+      "rate_pct": 21.42
+    },
+    "DEN": {
+      "name": "Denver-Aurora, CO",
+      "rate_pct": 30.52
+    },
+    "DM": {
+      "name": "Des Moines-Ames-West Des Moines, IA",
+      "rate_pct": 18.01
+    },
+    "DET": {
+      "name": "Detroit-Warren-Ann Arbor, MI",
+      "rate_pct": 29.12
+    },
+    "FN": {
+      "name": "Fresno-Madera-Hanford, CA",
+      "rate_pct": 17.65
+    },
+    "HB": {
+      "name": "Harrisburg-Lebanon, PA",
+      "rate_pct": 19.43
+    },
+    "HAR": {
+      "name": "Hartford-East Hartford, CT-MA",
+      "rate_pct": 32.08
+    },
+    "HOU": {
+      "name": "Houston-The Woodlands, TX",
+      "rate_pct": 35.0
+    },
+    "HNT": {
+      "name": "Huntsville-Decatur, AL-TN",
+      "rate_pct": 21.91
+    },
+    "IND": {
+      "name": "Indianapolis-Carmel-Muncie, IN",
+      "rate_pct": 18.15
+    },
+    "KC": {
+      "name": "Kansas City-Overland Park-Kansas City, MO-KS",
+      "rate_pct": 18.97
+    },
+    "LR": {
+      "name": "Laredo, TX",
+      "rate_pct": 21.59
+    },
+    "LV": {
+      "name": "Las Vegas-Henderson, NV-AZ",
+      "rate_pct": 19.57
+    },
+    "LA": {
+      "name": "Los Angeles-Long Beach, CA",
+      "rate_pct": 36.47
+    },
+    "MFL": {
+      "name": "Miami-Port St. Lucie-Fort Lauderdale, FL",
+      "rate_pct": 24.67
+    },
+    "MIL": {
+      "name": "Milwaukee-Racine-Waukesha, WI",
+      "rate_pct": 22.42
+    },
+    "MSP": {
+      "name": "Minneapolis-St. Paul, MN-WI",
+      "rate_pct": 27.62
+    },
+    "NY": {
+      "name": "New York-Newark, NY-NJ-CT-PA",
+      "rate_pct": 37.95
+    },
+    "OM": {
+      "name": "Omaha-Council Bluffs-Fremont, NE-IA",
+      "rate_pct": 18.23
+    },
+    "PB": {
+      "name": "Palm Bay-Melbourne-Titusville, FL",
+      "rate_pct": 17.93
+    },
+    "PHL": {
+      "name": "Philadelphia-Reading-Camden, PA-NJ-DE-MD",
+      "rate_pct": 28.99
+    },
+    "PX": {
+      "name": "Phoenix-Mesa, AZ",
+      "rate_pct": 22.45
+    },
+    "PIT": {
+      "name": "Pittsburgh-New Castle-Weirton, PA-OH-WV",
+      "rate_pct": 21.03
+    },
+    "POR": {
+      "name": "Portland-Vancouver-Salem, OR-WA",
+      "rate_pct": 26.13
+    },
+    "RA": {
+      "name": "Raleigh-Durham-Cary, NC",
+      "rate_pct": 22.24
+    },
+    "RN": {
+      "name": "Reno-Fernley, NV",
+      "rate_pct": 17.52
+    },
+    "RCH": {
+      "name": "Richmond, VA",
+      "rate_pct": 22.28
+    },
+    "RT": {
+      "name": "Rochester-Batavia-Seneca Falls, NY",
+      "rate_pct": 17.88
+    },
+    "SAC": {
+      "name": "Sacramento-Roseville, CA-NV",
+      "rate_pct": 29.76
+    },
+    "SO": {
+      "name": "San Antonio-New Braunfels-Pearsall, TX",
+      "rate_pct": 18.78
+    },
+    "SD": {
+      "name": "San Diego-Chula Vista-Carlsbad, CA",
+      "rate_pct": 33.72
+    },
+    "SF": {
+      "name": "San Jose-San Francisco-Oakland, CA",
+      "rate_pct": 46.34
+    },
+    "SEA": {
+      "name": "Seattle-Tacoma, WA",
+      "rate_pct": 31.57
+    },
+    "SN": {
+      "name": "Spokane-Spokane Valley-Coeur d'Alene, WA-ID",
+      "rate_pct": 17.67
+    },
+    "SL": {
+      "name": "St. Louis-St. Charles-Farmington, MO-IL",
+      "rate_pct": 20.03
+    },
+    "TU": {
+      "name": "Tucson-Nogales, AZ",
+      "rate_pct": 19.28
+    },
+    "VB": {
+      "name": "Virginia Beach-Norfolk, VA-NC",
+      "rate_pct": 18.8
+    },
+    "DCB": {
+      "name": "Washington-Baltimore-Arlington, DC-MD-VA-WV-PA",
+      "rate_pct": 33.94
+    },
+    "RUS": {
+      "name": "Rest of U.S.",
+      "rate_pct": 17.06
+    },
+    "AK": {
+      "name": "State of Alaska",
+      "rate_pct": 32.36
+    },
+    "HI": {
+      "name": "State of Hawaii",
+      "rate_pct": 22.21
+    }
+  }
+}

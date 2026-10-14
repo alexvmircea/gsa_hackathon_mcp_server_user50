@@ -490,7 +490,6 @@ dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "respx" },
-    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -507,7 +506,6 @@ dev = [
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.23" },
     { name = "respx", specifier = ">=0.21" },
-    { name = "websockets", specifier = ">=17.2" },
 ]
 
 [[package]]

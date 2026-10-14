@@ -1,1 +1,6 @@
-{}
+{
+    "github-enterprise.uri": "https://github.com",
+    "github-actions.workflows.pinned.workflows": [
+        
+    ]
+}

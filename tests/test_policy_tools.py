@@ -36,9 +36,17 @@ from hr_navigator.tools.policy_tools import look_up_hr_policy
 # ---------------------------------------------------------------------------
 
 SEARCH_URL = "https://www.ecfr.gov/api/search/v1/results"
+TITLES_URL = "https://www.ecfr.gov/api/versioner/v1/titles"
 SECTION_URL_PATTERN = r"https://www\.ecfr\.gov/api/versioner/v1/full/.*/title-5\.xml"
 
+# Canned /api/versioner/v1/titles response (used wherever get_section is called)
+TITLES_RESPONSE = {
+    "titles": [{"number": 5, "name": "Administrative Personnel", "latest_issue_date": "2026-01-01"}]
+}
+
 # Minimal valid eCFR search response with one hit
+# NOTE: The eCFR search API does NOT support server-side title filtering;
+# the client filters results client-side by hierarchy.title.
 ONE_HIT_RESPONSE = {
     "results": [
         {
@@ -145,6 +153,8 @@ async def test_section_fetch_failure_is_non_fatal() -> None:
     respx.get(SEARCH_URL).mock(
         return_value=Response(200, json=hit_without_excerpt)
     )
+    # _get_latest_issue_date is called before get_section
+    respx.get(TITLES_URL).mock(return_value=Response(200, json=TITLES_RESPONSE))
     # Section fetch returns 404
     respx.get(url__regex=SECTION_URL_PATTERN).mock(
         return_value=Response(404, text="Not Found")

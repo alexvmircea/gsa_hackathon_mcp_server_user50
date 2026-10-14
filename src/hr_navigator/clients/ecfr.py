@@ -159,6 +159,12 @@ class ECFRClient:
         ------
         ECFRError
             On HTTP or network failure.
+
+        Notes
+        -----
+        The eCFR search API does not accept server-side title filtering
+        (``conditions[*]`` and ``filter[*]`` params return HTTP 400).
+        Title filtering is applied client-side after fetching results.
         """
         per_page = min(max(1, max_results), 20)
         data = await self._get(
@@ -166,10 +172,14 @@ class ECFRClient:
             query=query,
             per_page=per_page,
             page=1,
-            # Restrict to the requested title
-            **{f"filter[cfr_citation][title]": title},
         )
         results: list[dict[str, Any]] = data.get("results", [])
+        # Filter to the requested title client-side
+        if title:
+            results = [
+                r for r in results
+                if str(r.get("hierarchy", {}).get("title", "")) == str(title)
+            ]
         return results[:max_results]
 
     async def get_section(
@@ -204,18 +214,29 @@ class ECFRClient:
         ECFRError
             On HTTP or network failure, or if the section does not exist.
         """
-        effective_date = (as_of or date.today()).isoformat()
+        if as_of:
+            effective_date = as_of.isoformat()
+        else:
+            # The versioner rejects dates past the title's latest_issue_date,
+            # so we fetch that date dynamically rather than using date.today().
+            effective_date = await self._get_latest_issue_date(title)
         path = f"/api/versioner/v1/full/{effective_date}/title-{title}.xml"
         xml = await self._get_xml(
             path,
             # eCFR supports section-level subsetting via the `section` param
-            **{
-                "chapter": "",
-                "part": str(part),
-                "section": f"{part}.{section}",
-            },
+            part=str(part),
+            section=f"{part}.{section}",
         )
         return xml
+
+    async def _get_latest_issue_date(self, title: int) -> str:
+        """Return the latest_issue_date string for a title from the versioner."""
+        data = await self._get("/api/versioner/v1/titles")
+        for t in data.get("titles", []):
+            if t.get("number") == title:
+                return t["latest_issue_date"]
+        # Fallback: walk back from today until we find a valid date
+        return (date.today()).isoformat()
 
     async def get_title_structure(
         self,
@@ -244,7 +265,10 @@ class ECFRClient:
         ECFRError
             On HTTP or network failure.
         """
-        effective_date = (as_of or date.today()).isoformat()
+        if as_of:
+            effective_date = as_of.isoformat()
+        else:
+            effective_date = await self._get_latest_issue_date(title)
         return await self._get(
             f"/api/versioner/v1/structure/{effective_date}/title-{title}.json"
         )

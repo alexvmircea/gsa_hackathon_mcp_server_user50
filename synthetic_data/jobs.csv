@@ -1,0 +1,89 @@
+JobCode,JobTitle,Series,Grade
+J0340GES,Executive (Senior Executive Service),0340,ES
+J1560G15,Data Science (GS-15),1560,15
+J0301GES,Miscellaneous Administration and Program (Senior Executive Service),0301,ES
+J1515GES,Operations Research (Senior Executive Service),1515,ES
+J0343G15,Management and Program Analysis (GS-15),0343,15
+J0201G15,Human Resources Management (GS-15),0201,15
+J0510GES,Accounting (Senior Executive Service),0510,ES
+J0905G15,General Attorney (GS-15),0905,15
+J1102GES,Contracting (Senior Executive Service),1102,ES
+J0260GES,Equal Employment Opportunity (Senior Executive Service),0260,ES
+J2210G15,Information Technology Management (GS-15),2210,15
+J1550G15,Computer Science (GS-15),1550,15
+J1515G15,Operations Research (GS-15),1515,15
+J0301G15,Miscellaneous Administration and Program (GS-15),0301,15
+J1102G15,Contracting (GS-15),1102,15
+J0080G15,Security Administration (GS-15),0080,15
+J1550G14,Computer Science (GS-14),1550,14
+J1550G13,Computer Science (GS-13),1550,13
+J2210G14,Information Technology Management (GS-14),2210,14
+J2210G13,Information Technology Management (GS-13),2210,13
+J1560G14,Data Science (GS-14),1560,14
+J1560G13,Data Science (GS-13),1560,13
+J0343G14,Management and Program Analysis (GS-14),0343,14
+J0343G13,Management and Program Analysis (GS-13),0343,13
+J0301G14,Miscellaneous Administration and Program (GS-14),0301,14
+J0301G13,Miscellaneous Administration and Program (GS-13),0301,13
+J1515G14,Operations Research (GS-14),1515,14
+J1515G13,Operations Research (GS-13),1515,13
+J0201G14,Human Resources Management (GS-14),0201,14
+J0201G13,Human Resources Management (GS-13),0201,13
+J0510G14,Accounting (GS-14),0510,14
+J0510G13,Accounting (GS-13),0510,13
+J0905G14,General Attorney (GS-14),0905,14
+J0905G13,General Attorney (GS-13),0905,13
+J1102G14,Contracting (GS-14),1102,14
+J1102G13,Contracting (GS-13),1102,13
+J0260G14,Equal Employment Opportunity (GS-14),0260,14
+J0260G13,Equal Employment Opportunity (GS-13),0260,13
+J0080G14,Security Administration (GS-14),0080,14
+J0080G13,Security Administration (GS-13),0080,13
+J1550G12,Computer Science (GS-12),1550,12
+J1550G11,Computer Science (GS-11),1550,11
+J1550G7,Computer Science (GS-7),1550,7
+J1550G9,Computer Science (GS-9),1550,9
+J2210G9,Information Technology Management (GS-9),2210,9
+J2210G11,Information Technology Management (GS-11),2210,11
+J2210G12,Information Technology Management (GS-12),2210,12
+J2210G7,Information Technology Management (GS-7),2210,7
+J1560G11,Data Science (GS-11),1560,11
+J1560G7,Data Science (GS-7),1560,7
+J1560G12,Data Science (GS-12),1560,12
+J1560G9,Data Science (GS-9),1560,9
+J0343G11,Management and Program Analysis (GS-11),0343,11
+J0343G12,Management and Program Analysis (GS-12),0343,12
+J0343G9,Management and Program Analysis (GS-9),0343,9
+J0343G7,Management and Program Analysis (GS-7),0343,7
+J0301G12,Miscellaneous Administration and Program (GS-12),0301,12
+J0301G7,Miscellaneous Administration and Program (GS-7),0301,7
+J0301G9,Miscellaneous Administration and Program (GS-9),0301,9
+J0301G11,Miscellaneous Administration and Program (GS-11),0301,11
+J1515G9,Operations Research (GS-9),1515,9
+J1515G11,Operations Research (GS-11),1515,11
+J1515G7,Operations Research (GS-7),1515,7
+J1515G12,Operations Research (GS-12),1515,12
+J0201G12,Human Resources Management (GS-12),0201,12
+J0201G11,Human Resources Management (GS-11),0201,11
+J0201G9,Human Resources Management (GS-9),0201,9
+J0201G7,Human Resources Management (GS-7),0201,7
+J0510G7,Accounting (GS-7),0510,7
+J0510G9,Accounting (GS-9),0510,9
+J0510G12,Accounting (GS-12),0510,12
+J0510G11,Accounting (GS-11),0510,11
+J0905G12,General Attorney (GS-12),0905,12
+J0905G7,General Attorney (GS-7),0905,7
+J0905G9,General Attorney (GS-9),0905,9
+J0905G11,General Attorney (GS-11),0905,11
+J1102G12,Contracting (GS-12),1102,12
+J1102G7,Contracting (GS-7),1102,7
+J1102G11,Contracting (GS-11),1102,11
+J1102G9,Contracting (GS-9),1102,9
+J0260G12,Equal Employment Opportunity (GS-12),0260,12
+J0260G7,Equal Employment Opportunity (GS-7),0260,7
+J0260G11,Equal Employment Opportunity (GS-11),0260,11
+J0260G9,Equal Employment Opportunity (GS-9),0260,9
+J0080G11,Security Administration (GS-11),0080,11
+J0080G12,Security Administration (GS-12),0080,12
+J0080G7,Security Administration (GS-7),0080,7
+J0080G9,Security Administration (GS-9),0080,9

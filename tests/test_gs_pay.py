@@ -1,5 +1,6 @@
 """
 Tests for the GS pay data loader (clients/gs_pay) and MCP tools (tools/pay_tools).
+Includes duty-station city lookup and search.
 
 All tests use the real bundled data file — no mocking of the JSON — so they
 also serve as a smoke-test that the data itself is valid and consistent with
@@ -13,12 +14,19 @@ import pytest
 from hr_navigator.clients.gs_pay import (
     PayDataError,
     _load_raw,
+    _load_stations,
     compute_pay,
     get_base_rate,
     get_metadata,
     list_localities,
+    resolve_locality_by_city,
+    search_duty_stations,
 )
-from hr_navigator.tools.pay_tools import get_gs_pay_info, list_gs_localities
+from hr_navigator.tools.pay_tools import (
+    get_gs_pay_info,
+    list_gs_localities,
+    search_duty_stations as tool_search_duty_stations,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -209,3 +217,184 @@ async def test_list_gs_localities_sorted_descending():
     assert locs[0]["code"] == "SF"
     # RUS should be last (lowest rate)
     assert locs[-1]["code"] == "RUS"
+
+
+# ---------------------------------------------------------------------------
+# Duty stations — static data
+# ---------------------------------------------------------------------------
+
+
+def test_load_stations_count():
+    stations = _load_stations()
+    assert len(stations) == 40010
+
+
+def test_load_stations_all_have_city():
+    for s in _load_stations():
+        assert s["city"].strip(), f"Station {s['code']} has empty city"
+
+
+def test_load_stations_all_have_locality_code():
+    for s in _load_stations():
+        assert s["locality_code"], f"Station {s['code']} has no locality_code"
+
+
+def test_load_stations_no_cbsa_csa():
+    """Exported JSON must not contain CBSA or CSA fields."""
+    for s in _load_stations():
+        assert "cbsa" not in s
+        assert "csa" not in s
+
+
+# ---------------------------------------------------------------------------
+# resolve_locality_by_city
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("city,state,expected_code", [
+    ("Huntsville",      "Alabama",           "HNT"),
+    ("Huntsville",      "AL",                "HNT"),
+    ("San Francisco",   "California",        "SF"),
+    ("Washington",      "District Of Columbia", "DCB"),
+    ("Houston",         "Texas",             "HOU"),
+    ("Chicago",         "Illinois",          "CHI"),
+    ("Los Angeles",     "California",        "LA"),
+    ("Denver",          "Colorado",          "DEN"),   # must specify state; multiple Denvers exist
+    ("Atlanta",         "Georgia",           "ATL"),
+    ("Abbeville",       "Alabama",           "RUS"),   # Rest of U.S. city
+])
+def test_resolve_locality_by_city_known_cities(city, state, expected_code):
+    result = resolve_locality_by_city(city, state)
+    assert result["locality_code"] == expected_code, (
+        f"{city}, {state} → got {result['locality_code']}, expected {expected_code}"
+    )
+    assert isinstance(result["rate_pct"], float)
+    assert result["city"].lower() == city.lower()
+
+
+def test_resolve_locality_by_city_case_insensitive():
+    r1 = resolve_locality_by_city("huntsville", "alabama")
+    r2 = resolve_locality_by_city("HUNTSVILLE", "ALABAMA")
+    assert r1["locality_code"] == r2["locality_code"]
+
+
+def test_resolve_locality_by_city_unknown_raises():
+    # "Atlantis" is a real city in Florida; use a truly nonexistent name
+    with pytest.raises(PayDataError, match="No OPM duty station found"):
+        resolve_locality_by_city("Zzzznonexistentcity", "Fictional")
+
+
+def test_resolve_locality_by_city_returns_expected_keys():
+    result = resolve_locality_by_city("Huntsville", "Alabama")
+    assert set(result.keys()) == {"locality_code", "csv_locality_code",
+                                  "locality_name", "rate_pct",
+                                  "city", "state", "lpa"}
+
+
+def test_resolve_locality_by_city_csv_code_preserved():
+    result = resolve_locality_by_city("Huntsville", "Alabama")
+    assert result["csv_locality_code"] == "HU"
+    assert result["locality_code"] == "HNT"
+
+
+# ---------------------------------------------------------------------------
+# search_duty_stations
+# ---------------------------------------------------------------------------
+
+
+def test_search_duty_stations_fragment():
+    results = search_duty_stations("hunts")
+    assert len(results) > 0
+    assert all("hunt" in r["city"].lower() for r in results)
+
+
+def test_search_duty_stations_with_state_filter():
+    results = search_duty_stations("Springfield", "Illinois")
+    assert all("illinois" in r["state"].lower() for r in results)
+
+
+def test_search_duty_stations_deduplicates():
+    """Same city+state should appear only once."""
+    results = search_duty_stations("Washington")
+    keys = [(r["city"].lower(), r["state"].lower()) for r in results]
+    assert len(keys) == len(set(keys))
+
+
+def test_search_duty_stations_no_match():
+    results = search_duty_stations("Zzzzqqqxxx")
+    assert results == []
+
+
+def test_search_duty_stations_returns_expected_keys():
+    results = search_duty_stations("Denver")
+    assert results
+    assert set(results[0].keys()) == {"city", "state", "lpa",
+                                      "locality_code", "csv_locality_code"}
+
+
+def test_search_duty_stations_translates_codes():
+    """locality_code must be gs_pay code; csv_locality_code must be CSV code."""
+    results = search_duty_stations("Huntsville", "Alabama")
+    assert results
+    r = results[0]
+    assert r["csv_locality_code"] == "HU"
+    assert r["locality_code"] == "HNT"
+
+
+# ---------------------------------------------------------------------------
+# compute_pay with city
+# ---------------------------------------------------------------------------
+
+
+def test_compute_pay_by_city():
+    result = compute_pay(9, 1, city="Huntsville", state="Alabama")
+    assert result["locality"]["code"] == "HNT"
+    assert "duty_station" in result
+    assert result["duty_station"]["city"] == "Huntsville"
+
+
+def test_compute_pay_city_overrides_locality_code():
+    """City takes precedence over an explicitly-passed locality_code."""
+    result_city = compute_pay(9, 1, city="San Francisco", state="California")
+    result_code = compute_pay(9, 1, locality_code="SF")
+    assert result_city["locality"]["code"] == result_code["locality"]["code"]
+    assert result_city["final_salary"] == result_code["final_salary"]
+
+
+def test_compute_pay_city_no_duty_station_key_when_code_only():
+    """duty_station key must not appear when resolving by code only."""
+    result = compute_pay(9, 1, locality_code="RUS")
+    assert "duty_station" not in result
+
+
+# ---------------------------------------------------------------------------
+# MCP tool — get_gs_pay_info with city
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_gs_pay_info_by_city():
+    result = await get_gs_pay_info(grade=11, step=3, city="Huntsville", state="Alabama")
+    assert result["locality"]["code"] == "HNT"
+    assert result["duty_station"]["city"] == "Huntsville"
+    assert result["final_salary"] > 0
+
+
+@pytest.mark.asyncio
+async def test_get_gs_pay_info_city_unknown_raises():
+    with pytest.raises(RuntimeError, match="No OPM duty station found"):
+        await get_gs_pay_info(grade=9, step=1, city="Zzzznonexistentcity")
+
+
+@pytest.mark.asyncio
+async def test_tool_search_duty_stations():
+    results = await tool_search_duty_stations(city="San Jose", state="California")
+    assert len(results) > 0
+    assert results[0]["locality_code"] == "SF"
+
+
+@pytest.mark.asyncio
+async def test_tool_search_duty_stations_sorted():
+    results = await tool_search_duty_stations(city="fort")
+    cities = [(r["city"], r["state"]) for r in results]
+    assert cities == sorted(cities)

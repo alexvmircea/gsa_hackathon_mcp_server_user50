@@ -1,0 +1,59 @@
+Locality Pay Area	Locality Code
+Albany-Schenectady, NY-MA	AL
+Albuquerque-Santa Fe-Las Vegas, NM	AQ
+Atlanta-Athens-Clarke County-Sandy Springs, GA-AL	ATL
+Austin-Round Rock-Georgetown, TX	AU
+Birmingham-Hoover-Talladega, AL	BH
+Boston-Worcester-Providence, MA-RI-NH-CT-ME-VT	BOS
+Buffalo-Cheektowaga-Olean, NY	BU
+Burlington-South Burlington-Barre, VT	BN
+Charlotte-Concord, NC-SC	CT
+Chicago-Naperville, IL-IN-WI	CHI
+Cincinnati-Wilmington-Maysville, OH-KY-IN	CIN
+Cleveland-Akron-Canton, OH-PA	CLE
+Colorado Springs, CO	CS
+Columbus-Marion-Zanesville, OH	COL
+Corpus Christi-Kingsville-Alice, TX	CC
+Dallas-Fort Worth, TX-OK	DFW
+Davenport-Moline, IA-IL	DV
+Dayton-Springfield-Kettering, OH	DAY
+Denver-Aurora, CO	DEN
+Des Moines-Ames-West Des Moines, IA	DM
+Detroit-Warren-Ann Arbor, MI	DET
+Fresno-Madera-Hanford, CA	FN
+Harrisburg-Lebanon, PA	HB
+Hartford-East Hartford, CT-MA	HAR
+Houston-The Woodlands, TX	HOU
+Huntsville-Decatur, AL-TN	HNT
+Indianapolis-Carmel-Muncie, IN	IND
+Kansas City-Overland Park-Kansas City, MO-KS	KC
+Laredo, TX	LR
+Las Vegas-Henderson, NV-AZ	LV
+Los Angeles-Long Beach, CA	LA
+Miami-Port St. Lucie-Fort Lauderdale, FL	MFL
+Milwaukee-Racine-Waukesha, WI	MIL
+Minneapolis-St. Paul, MN-WI	MSP
+New York-Newark, NY-NJ-CT-PA	NY
+Omaha-Council Bluffs-Fremont, NE-IA	OM
+Palm Bay-Melbourne-Titusville, FL	PB
+Philadelphia-Reading-Camden, PA-NJ-DE-MD	PHL
+Phoenix-Mesa, AZ	PX
+Pittsburgh-New Castle-Weirton, PA-OH-WV	PIT
+Portland-Vancouver-Salem, OR-WA	POR
+Raleigh-Durham-Cary, NC	RA
+Reno-Fernley, NV	RN
+Richmond, VA	RCH
+Rochester-Batavia-Seneca Falls, NY	RT
+Sacramento-Roseville, CA-NV	SAC
+San Antonio-New Braunfels-Pearsall, TX	SO
+San Diego-Chula Vista-Carlsbad, CA	SD
+San Jose-San Francisco-Oakland, CA	SF
+Seattle-Tacoma, WA	SEA
+Spokane-Spokane Valley-Coeur d'Alene, WA-ID	SN
+St. Louis-St. Charles-Farmington, MO-IL	SL
+Tucson-Nogales, AZ	TU
+Virginia Beach-Norfolk, VA-NC	VB
+Washington-Baltimore-Arlington, DC-MD-VA-WV-PA	DCB
+Rest of U.S.	RUS
+State of Alaska	AK
+State of Hawaii	HI
